@@ -1,0 +1,5 @@
+2024-03-15 10:00:00 INFO User login successful
+2024-03-15 10:00:05 ERROR Database connection failed
+2024-03-15 10:00:10 WARN High memory usage detected
+2024-03-15 10:00:15 INFO Backup completed
+2024-03-15 10:00:20 ERROR Authentication failed
