@@ -1,50 +1,49 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io"
 	"os"
-	"strings"
 )
 
-type manage struct {
-	filePath string
-}
+type manage struct{}
 
 func (m manage) help() string {
 	return "Эта утилита может работать с логами и парсить их в разные форматы данных(JSON/CSV)"
 }
 
-func (m manage) pathFile(path string) {
-	m.filePath = path
-	fmt.Println("added path:", path)
-}
+func (m manage) readFile(filename string) {
+	file, err := os.Open(filename)
 
-func main() {
-	fmt.Println(os.Args[1:])
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
-	manage := new(manage)
+	defer file.Close()
 
-	for true {
-		fmt.Print("> ")
-		// fmt.Scan(&command)
-		command, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	data := make([]byte, 64)
 
-		commandArray := strings.Split(command, " ")
-
-		// fmt.Println(commandArray)
-
-		if commandArray[0] == "help" {
-			fmt.Println(manage.help())
-		}
-
-		if commandArray[0] == "file-path" {
-			manage.pathFile(commandArray[1])
-		}
-
-		if commandArray[0] == "exit" {
+	count := 0
+	for {
+		_, err := file.Read(data)
+		count++
+		if err == io.EOF {
 			break
 		}
 	}
+	fmt.Println("Всего строк:", count)
+}
 
+func main() {
+	manage := new(manage)
+	command := os.Args[1:]
+
+	if command[0] == "--help" {
+		fmt.Println(manage.help())
+	}
+
+	if command[0] == "--file-read" {
+		manage.readFile(command[1])
+	}
 }
