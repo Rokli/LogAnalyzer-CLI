@@ -1,18 +1,26 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
-	"io"
 	"os"
 )
 
-type manage struct{}
+type manageCli struct {
+	mLogs *managerLogs
+}
 
-func (m manage) help() string {
+func newManageCli() manageCli {
+	var manage manageCli
+	manage.mLogs = newManagerLogs()
+	return manage
+}
+
+func (m manageCli) help() string {
 	return "Эта утилита может работать с логами и парсить их в разные форматы данных(JSON/CSV)"
 }
 
-func (m manage) readFile(filename string) {
+func (m manageCli) readFile(filename string) {
 	file, err := os.Open(filename)
 
 	if err != nil {
@@ -22,21 +30,25 @@ func (m manage) readFile(filename string) {
 
 	defer file.Close()
 
-	data := make([]byte, 64)
+	scanner := bufio.NewScanner(file)
 
 	count := 0
-	for {
-		_, err := file.Read(data)
+	for scanner.Scan() {
+		m.mLogs.arrayLogs = append(m.mLogs.arrayLogs, parseLine(string(scanner.Text())))
 		count++
-		if err == io.EOF {
-			break
-		}
 	}
+
+	fmt.Println("Файл прочитан")
 	fmt.Println("Всего строк:", count)
 }
 
+func (m manageCli) printStatFile() {
+	m.mLogs.logAnalyze()
+	m.mLogs.printStatCount()
+}
+
 func main() {
-	manage := new(manage)
+	manage := newManageCli()
 	command := os.Args[1:]
 
 	if command[0] == "--help" {
@@ -45,5 +57,11 @@ func main() {
 
 	if command[0] == "--file-read" {
 		manage.readFile(command[1])
+		if len(command) > 2 {
+			if command[2] == "-stats" {
+				manage.printStatFile()
+			}
+		}
+
 	}
 }
