@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 type manageCli struct {
@@ -40,11 +41,30 @@ func (m manageCli) readFile(filename string) {
 
 	fmt.Println("Файл прочитан")
 	fmt.Println("Всего строк:", count)
+	fmt.Println()
 }
 
 func (m manageCli) printStatFile() {
-	m.mLogs.logAnalyze()
 	m.mLogs.printStatCount()
+}
+
+func (m manageCli) printFilterByLevel(command string) {
+	fmt.Println("Найдено:")
+	m.mLogs.printFilterByLevel(strings.Split(command, "=")[1])
+}
+
+func (m manageCli) printSubStr(command string) {
+	fmt.Println("Найдено:")
+	m.mLogs.printSubStr(strings.Split(command, "=")[1])
+}
+
+func (m manageCli) printOutput(command string) {
+	if strings.Contains(command, "json") {
+		m.mLogs.printJson()
+	} else if strings.Contains(command, "csv") {
+		m.mLogs.printCsv()
+	}
+	fmt.Println("Файл создан")
 }
 
 func main() {
@@ -60,6 +80,18 @@ func main() {
 		if len(command) > 2 {
 			if command[2] == "-stats" {
 				manage.printStatFile()
+			}
+
+			if strings.Contains(command[2], "-level") {
+				manage.printFilterByLevel(command[2])
+			}
+
+			if strings.Contains(command[2], "-search") {
+				manage.printSubStr(command[2])
+			}
+
+			if strings.Contains(command[2], "-output") {
+				manage.printOutput(command[2])
 			}
 		}
 
