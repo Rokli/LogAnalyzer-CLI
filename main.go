@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -67,6 +68,11 @@ func (m manageCli) printOutput(command string) {
 	fmt.Println("Файл создан")
 }
 
+func (m manageCli) printLimitStr(command string) {
+	numberLimit, _ := strconv.Atoi(strings.Split(command, "=")[1])
+	m.mLogs.printLimitStr(numberLimit)
+}
+
 func main() {
 	manage := newManageCli()
 	command := os.Args[1:]
@@ -92,6 +98,10 @@ func main() {
 
 			if strings.Contains(command[2], "-output") {
 				manage.printOutput(command[2])
+			}
+
+			if strings.Contains(command[2], "-limit") {
+				manage.printLimitStr(command[2])
 			}
 		}
 

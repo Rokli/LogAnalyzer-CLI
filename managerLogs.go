@@ -135,3 +135,15 @@ func (m managerLogs) printCsv() {
 
 	writer.Flush()
 }
+
+func (m managerLogs) printLimitStr(number int) {
+	for i := 0; i < number; i++ {
+		fmt.Println(
+			m.arrayLogs[i].Timestamp,
+			" ",
+			m.arrayLogs[i].Level,
+			" ",
+			m.arrayLogs[i].Message,
+		)
+	}
+}
