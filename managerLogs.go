@@ -8,46 +8,29 @@ import (
 	"strings"
 )
 
-type managerLogs struct {
-	arrayLogs []LogEntry
-	count     map[string]int
-}
-
-func newManagerLogs() *managerLogs {
-	var manager managerLogs
-
-	manager.count = map[string]int{"INFO": 0, "ERROR": 0, "WARN": 0}
-
-	return &manager
-}
-
-func (m managerLogs) logAnalyze() {
-	for _, log := range m.arrayLogs {
+func GetStats(analyzeFile []LogEntry) map[string]int {
+	var count map[string]int = map[string]int{"INFO": 0, "ERROR": 0, "WARN": 0}
+	for _, log := range analyzeFile {
 		if log.Level == "INFO" {
-			m.count["INFO"]++
+			count["INFO"]++
 		}
 
 		if log.Level == "ERROR" {
-			m.count["ERROR"]++
+			count["ERROR"]++
 		}
 
 		if log.Level == "WARN" {
-			m.count["WARN"]++
+			count["WARN"]++
 		}
 	}
+
+	return count
 }
 
-func (m managerLogs) printStatCount() {
-	m.logAnalyze()
-	for key, value := range m.count {
-		fmt.Println(key, ":", value)
-	}
-}
-
-func (m managerLogs) filterByLevel(level string) []LogEntry {
+func GetFilterByLevel(analyzeFile []LogEntry, level string) []LogEntry {
 	var levels []LogEntry
 
-	for _, value := range m.arrayLogs {
+	for _, value := range analyzeFile {
 		if value.Level == level {
 			levels = append(levels, value)
 		}
@@ -55,35 +38,19 @@ func (m managerLogs) filterByLevel(level string) []LogEntry {
 	return levels
 }
 
-func (m managerLogs) printFilterByLevel(level string) {
-	var levels []LogEntry = m.filterByLevel(level)
-
-	for _, value := range levels {
-		fmt.Println(value.Timestamp, " ", value.Level, " ", value.Message)
-	}
-}
-
-func (m managerLogs) findSubStr(str string) []LogEntry {
+func GetFindSubStr(analyzeFile []LogEntry, subStr string) []LogEntry {
 	var findMessage []LogEntry
 
-	for _, value := range m.arrayLogs {
-		if strings.Contains(value.Message, str) {
+	for _, value := range analyzeFile {
+		if strings.Contains(value.Message, subStr) {
 			findMessage = append(findMessage, value)
 		}
 	}
 	return findMessage
 }
 
-func (m managerLogs) printSubStr(str string) {
-	var subStr []LogEntry = m.findSubStr(str)
-
-	for _, value := range subStr {
-		fmt.Println(value.Timestamp, " ", value.Level, " ", value.Message)
-	}
-}
-
-func (m managerLogs) printJson() {
-	b, err := json.MarshalIndent(m.arrayLogs, "\n", " ")
+func ToJSON(analyzeFile []LogEntry) {
+	b, err := json.MarshalIndent(analyzeFile, "\n", " ")
 
 	if err != nil {
 		fmt.Println(err)
@@ -102,10 +69,10 @@ func (m managerLogs) printJson() {
 	file.Write(b)
 }
 
-func (m managerLogs) printCsv() {
+func ToCSV(analyzeFile []LogEntry) {
 	var data [][]string
 
-	for _, value := range m.arrayLogs {
+	for _, value := range analyzeFile {
 		var tmp []string
 		tmp = append(tmp, value.Timestamp)
 		tmp = append(tmp, value.Level)
@@ -136,14 +103,14 @@ func (m managerLogs) printCsv() {
 	writer.Flush()
 }
 
-func (m managerLogs) printLimitStr(number int) {
+func GetLimitStr(analyzeFile []LogEntry, number int) []LogEntry {
+	var limitAnalyzeFile []LogEntry
 	for i := 0; i < number; i++ {
-		fmt.Println(
-			m.arrayLogs[i].Timestamp,
-			" ",
-			m.arrayLogs[i].Level,
-			" ",
-			m.arrayLogs[i].Message,
-		)
+		limitAnalyzeFile = append(limitAnalyzeFile, analyzeFile[i])
 	}
+	return limitAnalyzeFile
+}
+
+func help() string {
+	return "Эта утилита может работать с логами и парсить их в разные форматы данных(JSON/CSV)"
 }
