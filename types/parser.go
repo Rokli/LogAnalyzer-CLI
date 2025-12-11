@@ -1,12 +1,23 @@
-package main
+package types
 
 import (
 	"encoding/csv"
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 )
+
+type LogEntry struct {
+	Timestamp string
+	Level     string
+	Message   string
+}
+
+func ParseLine(line string) LogEntry {
+	array := strings.Split(line, " ")
+	parse := LogEntry{array[0] + " " + array[1], array[2], strings.Join(array[3:], " ")}
+	return parse
+}
 
 func GetStats(analyzeFile []LogEntry) map[string]int {
 	var count map[string]int = map[string]int{"INFO": 0, "ERROR": 0, "WARN": 0}
@@ -49,14 +60,7 @@ func GetFindSubStr(analyzeFile []LogEntry, subStr string) []LogEntry {
 	return findMessage
 }
 
-func ToJSON(analyzeFile []LogEntry) {
-	b, err := json.MarshalIndent(analyzeFile, "\n", " ")
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
+func CreateFileJSON(data []byte) {
 	file, err := os.Create("output.json")
 
 	if err != nil {
@@ -66,20 +70,10 @@ func ToJSON(analyzeFile []LogEntry) {
 
 	defer file.Close()
 
-	file.Write(b)
+	file.Write(data)
 }
 
-func ToCSV(analyzeFile []LogEntry) {
-	var data [][]string
-
-	for _, value := range analyzeFile {
-		var tmp []string
-		tmp = append(tmp, value.Timestamp)
-		tmp = append(tmp, value.Level)
-		tmp = append(tmp, value.Message)
-
-		data = append(data, tmp)
-	}
+func CreateFileCSV(data [][]string) {
 
 	file, err := os.Create("output.csv")
 
@@ -111,6 +105,6 @@ func GetLimitStr(analyzeFile []LogEntry, number int) []LogEntry {
 	return limitAnalyzeFile
 }
 
-func help() string {
+func Help() string {
 	return "Эта утилита может работать с логами и парсить их в разные форматы данных(JSON/CSV)"
 }

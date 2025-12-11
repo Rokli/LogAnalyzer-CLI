@@ -1,4 +1,4 @@
-package main
+package types
 
 import (
 	"flag"
@@ -16,7 +16,7 @@ type Config struct {
 	Help   bool
 }
 
-func validateConfig(cfg Config) error {
+func ValidateConfig(cfg Config) error {
 	if cfg.Help {
 		return nil
 	}
@@ -32,7 +32,7 @@ func validateConfig(cfg Config) error {
 	return nil
 }
 
-func parseFlags() Config {
+func ParseFlags() Config {
 	var cfg Config
 	flag.StringVar(&cfg.File, "file", "", "path to log file")
 	flag.BoolVar(&cfg.Stats, "stats", false, "show statistics")

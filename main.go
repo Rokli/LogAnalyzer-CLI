@@ -4,10 +4,13 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+
+	"github.com/Rokli/LogAnalyzer-CLI/formatters"
+	"github.com/Rokli/LogAnalyzer-CLI/types"
 )
 
-func readFile(filename string) []LogEntry {
-	var parseFile []LogEntry
+func readFile(filename string) []types.LogEntry {
+	var parseFile []types.LogEntry
 	file, err := os.Open(filename)
 
 	if err != nil {
@@ -21,7 +24,7 @@ func readFile(filename string) []LogEntry {
 
 	count := 0
 	for scanner.Scan() {
-		parseFile = append(parseFile, parseLine(string(scanner.Text())))
+		parseFile = append(parseFile, types.ParseLine(string(scanner.Text())))
 		count++
 	}
 
@@ -32,7 +35,7 @@ func readFile(filename string) []LogEntry {
 	return parseFile
 }
 
-func printOutput(output []LogEntry) {
+func printOutput(output []types.LogEntry) {
 	for _, value := range output {
 		fmt.Println(
 			value.Timestamp,
@@ -45,28 +48,28 @@ func printOutput(output []LogEntry) {
 }
 
 func main() {
-	var cfg Config = parseFlags()
+	var cfg types.Config = types.ParseFlags()
 
-	err := validateConfig(cfg)
+	err := types.ValidateConfig(cfg)
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	var analyzeFile []LogEntry = readFile(cfg.File)
+	var analyzeFile []types.LogEntry = readFile(cfg.File)
 
 	if cfg.Help {
-		fmt.Println(help())
+		fmt.Println(types.Help())
 		return
 	}
 
 	if cfg.Limit != 0 {
-		analyzeFile = GetLimitStr(analyzeFile, cfg.Limit)
+		analyzeFile = types.GetLimitStr(analyzeFile, cfg.Limit)
 	}
 
 	if cfg.Stats {
-		var output map[string]int = GetStats(analyzeFile)
+		var output map[string]int = types.GetStats(analyzeFile)
 		for key, value := range output {
 			fmt.Println(key, ":", value)
 		}
@@ -74,18 +77,30 @@ func main() {
 	}
 
 	if cfg.Level != "" {
-		analyzeFile = GetFilterByLevel(analyzeFile, cfg.Level)
+		analyzeFile = types.GetFilterByLevel(analyzeFile, cfg.Level)
 	}
 
 	if cfg.Search != "" {
-		analyzeFile = GetFindSubStr(analyzeFile, cfg.Search)
+		analyzeFile = types.GetFindSubStr(analyzeFile, cfg.Search)
 	}
 
 	if cfg.Search != "" {
 		if cfg.Search == "json" {
-			ToJSON(analyzeFile)
+			data, err := formatters.ToJSON(analyzeFile)
+
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			types.CreateFileJSON(data)
 		} else if cfg.Search == "csv" {
-			ToCSV(analyzeFile)
+			data, err := formatters.ToCSV(analyzeFile)
+
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			types.CreateFileCSV(data)
 		}
 	}
 
