@@ -1,7 +1,7 @@
 package formatters
 
 import (
-	"github.com/Rokli/LogAnalyzer-CLI/types"
+	"github.com/Rokli/LogAnalyzer-CLI/internal/types"
 )
 
 func ToCSV(analyzeFile []types.LogEntry) ([][]string, error) {

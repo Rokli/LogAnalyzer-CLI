@@ -3,7 +3,7 @@ package test
 import (
 	"testing"
 
-	"github.com/Rokli/LogAnalyzer-CLI/types"
+	"github.com/Rokli/LogAnalyzer-CLI/internal/types"
 )
 
 func TestParserLine(t *testing.T) {

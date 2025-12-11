@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/Rokli/LogAnalyzer-CLI/formatters"
-	"github.com/Rokli/LogAnalyzer-CLI/types"
+	"github.com/Rokli/LogAnalyzer-CLI/internal/formatters"
+	"github.com/Rokli/LogAnalyzer-CLI/internal/types"
 )
 
 func readFile(filename string) []types.LogEntry {
