@@ -7,10 +7,11 @@ import (
 
 	"github.com/Rokli/LogAnalyzer-CLI/internal/formatters"
 	"github.com/Rokli/LogAnalyzer-CLI/internal/types"
+	"github.com/Rokli/LogAnalyzer-CLI/pkg/logs"
 )
 
-func readFile(filename string) []types.LogEntry {
-	var parseFile []types.LogEntry
+func readFile(filename string) []logs.LogEntry {
+	var parseFile []logs.LogEntry
 	file, err := os.Open(filename)
 
 	if err != nil {
@@ -24,7 +25,14 @@ func readFile(filename string) []types.LogEntry {
 
 	count := 0
 	for scanner.Scan() {
-		parseFile = append(parseFile, types.ParseLine(string(scanner.Text())))
+		parseLine, err := types.ParseLine(string(scanner.Text()))
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		parseFile = append(parseFile, parseLine)
 		count++
 	}
 
@@ -35,7 +43,7 @@ func readFile(filename string) []types.LogEntry {
 	return parseFile
 }
 
-func printOutput(output []types.LogEntry) {
+func printOutput(output []logs.LogEntry) {
 	for _, value := range output {
 		fmt.Println(
 			value.Timestamp,
@@ -57,7 +65,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	var analyzeFile []types.LogEntry = readFile(cfg.File)
+	var analyzeFile []logs.LogEntry = readFile(cfg.File)
 
 	if cfg.Help {
 		fmt.Println(types.Help())
@@ -84,7 +92,7 @@ func main() {
 		analyzeFile = types.GetFindSubStr(analyzeFile, cfg.Search)
 	}
 
-	if cfg.Search != "" {
+	if cfg.Output != "" {
 		if cfg.Search == "json" {
 			data, err := formatters.ToJSON(analyzeFile)
 

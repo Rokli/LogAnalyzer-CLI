@@ -5,41 +5,39 @@ import (
 	"fmt"
 	"os"
 	"strings"
+
+	"github.com/Rokli/LogAnalyzer-CLI/pkg/logs"
 )
 
-type LogEntry struct {
-	Timestamp string
-	Level     string
-	Message   string
-}
-
-func ParseLine(line string) LogEntry {
+func ParseLine(line string) (logs.LogEntry, error) {
 	array := strings.Split(line, " ")
-	parse := LogEntry{array[0] + " " + array[1], array[2], strings.Join(array[3:], " ")}
-	return parse
-}
-
-func GetStats(analyzeFile []LogEntry) map[string]int {
-	var count map[string]int = map[string]int{"INFO": 0, "ERROR": 0, "WARN": 0}
-	for _, log := range analyzeFile {
-		if log.Level == "INFO" {
-			count["INFO"]++
-		}
-
-		if log.Level == "ERROR" {
-			count["ERROR"]++
-		}
-
-		if log.Level == "WARN" {
-			count["WARN"]++
-		}
+	if len(array) < 3 {
+		return logs.LogEntry{}, fmt.Errorf("invalid log format: %s", line)
 	}
 
+	timestamp := array[0] + " " + array[1]
+	level := array[2]
+	message := strings.Join(array[3:], " ")
+
+	return logs.LogEntry{Timestamp: timestamp, Level: level, Message: message}, nil
+}
+
+func GetStats(analyzeFile []logs.LogEntry) map[string]int {
+	count := map[string]int{
+		logs.LevelInfo:  0,
+		logs.LevelError: 0,
+		logs.LevelWarn:  0,
+	}
+	for _, log := range analyzeFile {
+		if val, exists := count[log.Level]; exists {
+			count[log.Level] = val + 1
+		}
+	}
 	return count
 }
 
-func GetFilterByLevel(analyzeFile []LogEntry, level string) []LogEntry {
-	var levels []LogEntry
+func GetFilterByLevel(analyzeFile []logs.LogEntry, level string) []logs.LogEntry {
+	var levels []logs.LogEntry
 
 	for _, value := range analyzeFile {
 		if value.Level == level {
@@ -49,8 +47,8 @@ func GetFilterByLevel(analyzeFile []LogEntry, level string) []LogEntry {
 	return levels
 }
 
-func GetFindSubStr(analyzeFile []LogEntry, subStr string) []LogEntry {
-	var findMessage []LogEntry
+func GetFindSubStr(analyzeFile []logs.LogEntry, subStr string) []logs.LogEntry {
+	var findMessage []logs.LogEntry
 
 	for _, value := range analyzeFile {
 		if strings.Contains(value.Message, subStr) {
@@ -97,8 +95,8 @@ func CreateFileCSV(data [][]string) {
 	writer.Flush()
 }
 
-func GetLimitStr(analyzeFile []LogEntry, number int) []LogEntry {
-	var limitAnalyzeFile []LogEntry
+func GetLimitStr(analyzeFile []logs.LogEntry, number int) []logs.LogEntry {
+	var limitAnalyzeFile []logs.LogEntry
 	for i := 0; i < number; i++ {
 		limitAnalyzeFile = append(limitAnalyzeFile, analyzeFile[i])
 	}
